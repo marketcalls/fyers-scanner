@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(cat:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(pip install:*)"
     ],
     "deny": [],
     "ask": []

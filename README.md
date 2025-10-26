@@ -29,13 +29,33 @@ git clone <repository-url>
 cd scanner
 ```
 
-2. Install dependencies:
+2. Create a virtual environment (recommended):
 ```bash
+python -m venv venv
+
+# On Windows
+venv\Scripts\activate
+
+# On Linux/Mac
+source venv/bin/activate
+```
+
+3. Install dependencies:
+```bash
+# Important: Remove any conflicting jose package first
+pip uninstall -y jose
+
+# Install requirements
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables (optional):
+4. Set up environment variables (optional):
 ```bash
+# On Windows (PowerShell)
+$env:SECRET_KEY="your-secure-secret-key"
+$env:LOG_LEVEL="INFO"
+
+# On Linux/Mac
 export SECRET_KEY="your-secure-secret-key"
 export LOG_LEVEL="INFO"
 ```
@@ -157,7 +177,7 @@ Logs are stored in the `logs/` directory with automatic rotation:
 - **Database**: SQLite with SQLAlchemy ORM
 - **Frontend**: Jinja2 templates, Tailwind CSS, DaisyUI
 - **API**: Fyers API v3
-- **Authentication**: Passlib (bcrypt), python-jose (JWT), OAuth2
+- **Authentication**: Passlib (bcrypt), PyJWT, OAuth2
 - **HTTP Client**: httpx
 - **Data Analysis**: pandas, numpy
 

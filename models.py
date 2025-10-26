@@ -71,13 +71,14 @@ class ScanRequest(BaseModel):
     watchlist_id: int = Field(..., description="Watchlist ID to scan")
     timeframe: str = Field(..., description="Timeframe: 5, 10, 15 (minutes)")
 
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "watchlist_id": 1,
                 "timeframe": "5"
             }
         }
+    }
 
 
 class ScanResultResponse(BaseModel):

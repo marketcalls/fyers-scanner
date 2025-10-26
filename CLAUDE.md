@@ -14,7 +14,7 @@ This is a simple intraday scanner project using Fyers API to fetch historical da
 - **Database**: SQLite with SQLAlchemy ORM
 - **Frontend**: Jinja2 Templates, Tailwind CSS, DaisyUI
 - **API Integration**: Fyers API v3
-- **Authentication**: Passlib (bcrypt), python-jose (JWT), OAuth2
+- **Authentication**: Passlib (bcrypt), PyJWT (JWT), OAuth2
 - **Logging**: Python logging with rotation and centralized management
 - **Data Processing**: pandas, numpy for EMA calculations
 - **HTTP Client**: httpx for async API calls
