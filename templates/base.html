@@ -1,72 +1,40 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Fyers Intraday Scanner{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .signal-buy { @apply badge badge-success; }
-        .signal-sell { @apply badge badge-error; }
-        .signal-neutral { @apply badge badge-ghost; }
-    </style>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <!-- Navbar -->
     {% if user %}
-    <div class="navbar bg-base-100 shadow-lg">
-        <div class="navbar-start">
-            <div class="dropdown">
-                <label tabindex="0" class="btn btn-ghost lg:hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
-                    </svg>
-                </label>
-                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a href="/dashboard">Dashboard</a></li>
-                    <li><a href="/logout">Logout</a></li>
-                </ul>
-            </div>
-            <a href="/dashboard" class="btn btn-ghost normal-case text-xl">📈 Fyers Scanner</a>
-        </div>
-        <div class="navbar-center hidden lg:flex">
-            <ul class="menu menu-horizontal px-1">
-                <li><a href="/dashboard">Dashboard</a></li>
-            </ul>
-        </div>
-        <div class="navbar-end">
-            <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-ghost">
-                    <div class="avatar placeholder">
-                        <div class="bg-neutral-focus text-neutral-content rounded-full w-8">
-                            <span class="text-xs">{{ user.username[0].upper() }}</span>
-                        </div>
-                    </div>
-                    <span class="ml-2 hidden lg:inline">{{ user.username }}</span>
-                </label>
-                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li class="menu-title">
-                        <span>{{ user.email }}</span>
-                    </li>
-                    <li><a href="/fyers/auth">{% if user.access_token %}Re-authenticate{% else %}Authenticate{% endif %} Fyers</a></li>
-                    <li><a href="/logout">Logout</a></li>
-                </ul>
+    <nav class="navbar">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="/dashboard" class="navbar-brand">
+                <span style="font-size: 1.5rem;">⚡</span>
+                <span>Fyers Scanner</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <span class="text-secondary" style="font-size: 0.875rem;">{{ user.username }}</span>
+                <a href="/fyers/auth" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                    {% if user.access_token %}Re-authenticate{% else %}Authenticate Fyers{% endif %}
+                </a>
+                <a href="/logout" class="btn btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Logout</a>
             </div>
         </div>
-    </div>
+    </nav>
     {% endif %}
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <main style="padding: 2rem 0;">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-12">
-        <div>
-            <p>Fyers Intraday Scanner - EMA Crossover Strategy</p>
-        </div>
+    <footer>
+        <p>Fyers Intraday Scanner - EMA Crossover Strategy</p>
+        <p style="font-size: 0.75rem; margin-top: 0.5rem;">Built with FastAPI, SQLAlchemy & Fyers API</p>
     </footer>
 </body>
 </html>

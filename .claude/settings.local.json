@@ -4,7 +4,8 @@
       "Bash(dir:*)",
       "Bash(cat:*)",
       "Bash(pip uninstall:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Read(//c/Users/Admin1/Desktop/**)"
     ],
     "deny": [],
     "ask": []

@@ -3,119 +3,131 @@
 {% block title %}Dashboard - Fyers Scanner{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
-    <h1 class="text-4xl font-bold mb-8">Dashboard</h1>
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+    <div class="hero-title" style="font-size: 2.5rem; margin-bottom: 0.5rem;">
+        <span class="accent">Scan Stocks</span> with Precision
+    </div>
+    <p class="hero-subtitle" style="font-size: 1rem; margin-bottom: 3rem;">
+        EMA Crossover Scanner for Intraday Trading
+    </p>
 
+    <!-- Alerts -->
     {% if success %}
-    <div class="alert alert-success mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>{{ success }}</span>
+    <div class="alert alert-success" style="margin-bottom: 2rem;">
+        <strong>✓</strong> {{ success }}
     </div>
     {% endif %}
 
     {% if error %}
-    <div class="alert alert-error mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>{{ error }}</span>
+    <div class="alert alert-error" style="margin-bottom: 2rem;">
+        <strong>×</strong> {{ error }}
     </div>
     {% endif %}
 
     <!-- Fyers Authentication Status -->
-    <div class="card bg-base-100 shadow-xl mb-8">
-        <div class="card-body">
-            <h2 class="card-title">Fyers Authentication</h2>
-            <div class="flex items-center gap-4">
+    <div class="card" style="margin-bottom: 3rem;">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="card-title" style="font-size: 1.25rem; margin-bottom: 0.5rem;">Fyers Connection</h2>
                 {% if user.access_token %}
-                <div class="badge badge-success gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Connected
+                <div class="flex items-center gap-4">
+                    <span class="badge badge-success">● Connected</span>
+                    <span class="text-secondary" style="font-size: 0.875rem;">You can run scans now</span>
                 </div>
-                <p>You are authenticated with Fyers. You can now run scans.</p>
-                <a href="/fyers/auth" class="btn btn-sm btn-outline">Re-authenticate</a>
                 {% else %}
-                <div class="badge badge-warning gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                    </svg>
-                    Not Connected
+                <div class="flex items-center gap-4">
+                    <span class="badge badge-error">● Not Connected</span>
+                    <span class="text-secondary" style="font-size: 0.875rem;">Please authenticate to run scans</span>
                 </div>
-                <p>Please authenticate with Fyers to run scans.</p>
-                <a href="/fyers/auth" class="btn btn-sm btn-primary">Authenticate Now</a>
                 {% endif %}
+            </div>
+            <div>
+                <a href="/fyers/auth" class="btn {% if user.access_token %}btn-secondary{% else %}btn-primary{% endif %}">
+                    {% if user.access_token %}Re-authenticate{% else %}Connect Fyers{% endif %}
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Watchlists Section -->
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold">Your Watchlists</h2>
-        <button class="btn btn-primary" onclick="create_watchlist_modal.showModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Create Watchlist
+    <div class="flex justify-between items-center mb-6">
+        <h2 style="font-size: 1.75rem; font-weight: 600;">Your Watchlists</h2>
+        <button onclick="showCreateModal()" class="btn btn-primary">
+            + Create Watchlist
         </button>
     </div>
 
     {% if watchlists %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-3">
         {% for watchlist in watchlists %}
-        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-            <div class="card-body">
-                <h3 class="card-title">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <h3 class="card-title" style="font-size: 1.25rem; margin-bottom: 0;">
                     {{ watchlist.name }}
-                    {% if watchlist.is_default %}
-                    <div class="badge badge-primary">Default</div>
-                    {% endif %}
                 </h3>
-                <p class="text-sm text-base-content/70">{{ watchlist.symbols|length }} symbols</p>
-                <div class="card-actions justify-end mt-4">
-                    <a href="/watchlist/{{ watchlist.id }}" class="btn btn-sm btn-outline">Manage</a>
-                    {% if user.access_token %}
-                    <a href="/scan/{{ watchlist.id }}" class="btn btn-sm btn-primary">Scan</a>
-                    {% else %}
-                    <button class="btn btn-sm btn-disabled" title="Please authenticate with Fyers first">Scan</button>
-                    {% endif %}
-                </div>
+                {% if watchlist.is_default %}
+                <span class="badge badge-primary">Default</span>
+                {% endif %}
+            </div>
+
+            <p class="text-secondary" style="font-size: 0.875rem; margin-bottom: 1.5rem;">
+                {{ watchlist.symbols|length }} symbols
+            </p>
+
+            <div class="flex gap-4">
+                <a href="/watchlist/{{ watchlist.id }}" class="btn btn-secondary" style="flex: 1;">Manage</a>
+                {% if user.access_token %}
+                <a href="/scan/{{ watchlist.id }}" class="btn btn-primary" style="flex: 1;">Scan</a>
+                {% else %}
+                <button class="btn btn-secondary" style="flex: 1; opacity: 0.5; cursor: not-allowed;" disabled>Scan</button>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
     <div class="alert alert-info">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <span>No watchlists yet. Create one to get started!</span>
+        <div>
+            <strong>ℹ</strong>
+            <span>No watchlists yet. Create one to get started!</span>
+        </div>
     </div>
     {% endif %}
 </div>
 
 <!-- Create Watchlist Modal -->
-<dialog id="create_watchlist_modal" class="modal">
-    <div class="modal-box">
-        <h3 class="font-bold text-lg">Create New Watchlist</h3>
+<div id="createModal" style="display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 50; align-items: center; justify-content: center;">
+    <div class="auth-card" style="max-width: 500px;">
+        <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem;">Create New Watchlist</h2>
+
         <form method="post" action="/watchlist/create">
-            <div class="form-control w-full mt-4">
-                <label class="label">
-                    <span class="label-text">Watchlist Name</span>
-                </label>
-                <input type="text" name="name" placeholder="e.g., Nifty 50, Bank Stocks" class="input input-bordered w-full" required />
+            <div class="form-control">
+                <label class="form-label">Watchlist Name</label>
+                <input type="text" name="name" class="form-input" placeholder="e.g., Nifty 50, Bank Stocks" required />
             </div>
-            <div class="modal-action">
-                <button type="submit" class="btn btn-primary">Create</button>
-                <button type="button" class="btn" onclick="create_watchlist_modal.close()">Cancel</button>
+
+            <div class="flex gap-4">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Create</button>
+                <button type="button" onclick="hideCreateModal()" class="btn btn-secondary" style="flex: 1;">Cancel</button>
             </div>
         </form>
     </div>
-    <form method="dialog" class="modal-backdrop">
-        <button>close</button>
-    </form>
-</dialog>
+</div>
+
+<script>
+function showCreateModal() {
+    document.getElementById('createModal').style.display = 'flex';
+}
+
+function hideCreateModal() {
+    document.getElementById('createModal').style.display = 'none';
+}
+
+// Close modal on outside click
+document.getElementById('createModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideCreateModal();
+    }
+});
+</script>
 {% endblock %}

@@ -3,62 +3,56 @@
 {% block title %}Register - Fyers Scanner{% endblock %}
 
 {% block content %}
-<div class="hero min-h-screen bg-base-200">
-    <div class="hero-content flex-col lg:flex-row-reverse">
-        <div class="text-center lg:text-left">
-            <h1 class="text-5xl font-bold">Register Now!</h1>
-            <p class="py-6">Create an account to start scanning stocks with EMA crossover strategy. You'll need your Fyers API credentials to get started.</p>
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Start scanning stocks with EMA crossover strategy</p>
+
+        {% if error %}
+        <div class="alert alert-error">
+            <strong>×</strong> {{ error }}
         </div>
-        <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-            <form method="post" action="/register" class="card-body">
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Username</span>
-                    </label>
-                    <input type="text" name="username" placeholder="username" class="input input-bordered" required />
-                </div>
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Email</span>
-                    </label>
-                    <input type="email" name="email" placeholder="email@example.com" class="input input-bordered" required />
-                </div>
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Password</span>
-                    </label>
-                    <input type="password" name="password" placeholder="password" class="input input-bordered" required />
-                </div>
-                <div class="divider">Fyers API Credentials</div>
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Fyers App ID</span>
-                    </label>
-                    <input type="text" name="fyers_app_id" placeholder="XXXXX-100" class="input input-bordered" required />
-                </div>
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Fyers App Secret</span>
-                    </label>
-                    <input type="password" name="fyers_app_secret" placeholder="your-app-secret" class="input input-bordered" required />
-                </div>
+        {% endif %}
 
-                {% if error %}
-                <div class="alert alert-error">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>{{ error }}</span>
-                </div>
-                {% endif %}
+        <form method="post" action="/register">
+            <div class="form-control">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-input" placeholder="Choose a username" required />
+            </div>
 
-                <div class="form-control mt-6">
-                    <button type="submit" class="btn btn-primary">Register</button>
-                </div>
-                <div class="text-center mt-4">
-                    <a href="/login" class="link link-primary">Already have an account? Login</a>
-                </div>
-            </form>
+            <div class="form-control">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" placeholder="your@email.com" required />
+            </div>
+
+            <div class="form-control">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-input" placeholder="Create a password" required />
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-secondary);">Fyers API Credentials</h3>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Get your credentials from <a href="https://myapi.fyers.in/dashboard" target="_blank">Fyers Dashboard</a>
+            </p>
+
+            <div class="form-control">
+                <label class="form-label">Fyers App ID</label>
+                <input type="text" name="fyers_app_id" class="form-input" placeholder="XXXXX-100" required />
+            </div>
+
+            <div class="form-control">
+                <label class="form-label">Fyers App Secret</label>
+                <input type="password" name="fyers_app_secret" class="form-input" placeholder="Your app secret" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">Create Account</button>
+        </form>
+
+        <div class="text-center">
+            <span class="text-secondary" style="font-size: 0.875rem;">Already have an account?</span>
+            <a href="/login" style="margin-left: 0.5rem;">Sign in</a>
         </div>
     </div>
 </div>

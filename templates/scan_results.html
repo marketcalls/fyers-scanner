@@ -3,147 +3,142 @@
 {% block title %}Scan Results - {{ watchlist.name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
-    <div class="mb-8">
-        <a href="/scan/{{ watchlist.id }}" class="btn btn-ghost btn-sm mb-2">← Back to Scan</a>
-        <h1 class="text-4xl font-bold">Scan Results: {{ watchlist.name }}</h1>
-        <p class="text-base-content/70 mt-2">Timeframe: {{ timeframe }}m | Scanned at: {{ scan_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+    <div style="margin-bottom: 2rem;">
+        <a href="/scan/{{ watchlist.id }}" class="text-secondary" style="font-size: 0.875rem; text-decoration: none;">← Back to Scan</a>
+        <h1 style="font-size: 2.5rem; font-weight: 700; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+            Scan Results: <span class="text-accent">{{ watchlist.name }}</span>
+        </h1>
+        <p class="text-secondary">Timeframe: {{ timeframe }}m | {{ scan_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>
     </div>
 
     <!-- Summary Stats -->
-    <div class="stats shadow w-full mb-8">
-        <div class="stat">
-            <div class="stat-figure text-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-            </div>
-            <div class="stat-title">Total Symbols</div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Symbols</div>
             <div class="stat-value">{{ results|length }}</div>
             <div class="stat-desc">Scanned successfully</div>
         </div>
 
-        <div class="stat">
-            <div class="stat-figure text-success">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div class="stat-title">Buy Signals</div>
-            <div class="stat-value text-success">{{ buy_signals }}</div>
+        <div class="stat-card" style="border-color: var(--success-green);">
+            <div class="stat-label">Buy Signals</div>
+            <div class="stat-value" style="color: var(--success-green);">{{ buy_signals }}</div>
             <div class="stat-desc">Bullish crossovers</div>
         </div>
 
-        <div class="stat">
-            <div class="stat-figure text-error">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </div>
-            <div class="stat-title">Sell Signals</div>
-            <div class="stat-value text-error">{{ sell_signals }}</div>
+        <div class="stat-card" style="border-color: var(--error-red);">
+            <div class="stat-label">Sell Signals</div>
+            <div class="stat-value" style="color: var(--error-red);">{{ sell_signals }}</div>
             <div class="stat-desc">Bearish crossovers</div>
         </div>
 
-        <div class="stat">
-            <div class="stat-figure text-base-content/50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                </svg>
-            </div>
-            <div class="stat-title">Neutral</div>
-            <div class="stat-value text-base-content/50">{{ neutral_signals }}</div>
+        <div class="stat-card">
+            <div class="stat-label">Neutral</div>
+            <div class="stat-value" style="color: var(--text-secondary);">{{ neutral_signals }}</div>
             <div class="stat-desc">No crossover</div>
         </div>
     </div>
 
     <!-- Filter Tabs -->
-    <div class="tabs tabs-boxed mb-4">
-        <a class="tab tab-active" onclick="filterResults('all')">All ({{ results|length }})</a>
-        <a class="tab" onclick="filterResults('buy')">Buy ({{ buy_signals }})</a>
-        <a class="tab" onclick="filterResults('sell')">Sell ({{ sell_signals }})</a>
-        <a class="tab" onclick="filterResults('neutral')">Neutral ({{ neutral_signals }})</a>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <button onclick="filterResults('all')" class="filter-btn btn btn-secondary active-filter" data-filter="all">
+            All ({{ results|length }})
+        </button>
+        <button onclick="filterResults('buy')" class="filter-btn btn btn-secondary" data-filter="buy" style="border-color: var(--success-green); color: var(--success-green);">
+            Buy ({{ buy_signals }})
+        </button>
+        <button onclick="filterResults('sell')" class="filter-btn btn btn-secondary" data-filter="sell" style="border-color: var(--error-red); color: var(--error-red);">
+            Sell ({{ sell_signals }})
+        </button>
+        <button onclick="filterResults('neutral')" class="filter-btn btn btn-secondary" data-filter="neutral">
+            Neutral ({{ neutral_signals }})
+        </button>
     </div>
 
     <!-- Results Table -->
     {% if results %}
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <div class="overflow-x-auto">
-                <table class="table table-zebra">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Symbol</th>
-                            <th>Display Name</th>
-                            <th>Signal</th>
-                            <th>Current Price</th>
-                            <th>10 EMA</th>
-                            <th>20 EMA</th>
-                            <th>Timeframe</th>
-                        </tr>
-                    </thead>
-                    <tbody id="resultsTable">
-                        {% for result in results %}
-                        <tr class="result-row" data-signal="{{ result.signal.lower() }}">
-                            <td>{{ loop.index }}</td>
-                            <td><code class="bg-base-200 px-2 py-1 rounded text-xs">{{ result.symbol }}</code></td>
-                            <td class="font-bold">{{ result.display_name }}</td>
-                            <td>
-                                {% if result.signal == 'BUY' %}
-                                <div class="badge badge-success gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                    </svg>
-                                    BUY
-                                </div>
-                                {% elif result.signal == 'SELL' %}
-                                <div class="badge badge-error gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                                    </svg>
-                                    SELL
-                                </div>
-                                {% else %}
-                                <div class="badge badge-ghost">NEUTRAL</div>
-                                {% endif %}
-                            </td>
-                            <td class="font-mono">₹{{ result.current_price }}</td>
-                            <td class="font-mono text-sm">₹{{ result.ema10 }}</td>
-                            <td class="font-mono text-sm">₹{{ result.ema20 }}</td>
-                            <td>{{ result.timeframe }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <div class="card">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Symbol</th>
+                        <th>Display Name</th>
+                        <th>Signal</th>
+                        <th>Current Price</th>
+                        <th>10 EMA</th>
+                        <th>20 EMA</th>
+                        <th>Timeframe</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTable">
+                    {% for result in results %}
+                    <tr class="result-row" data-signal="{{ result.signal.lower() }}">
+                        <td>{{ loop.index }}</td>
+                        <td><code style="font-size: 0.875rem;">{{ result.symbol }}</code></td>
+                        <td style="font-weight: 600;">{{ result.display_name }}</td>
+                        <td>
+                            {% if result.signal == 'BUY' %}
+                            <span class="badge badge-success">
+                                ↗ BUY
+                            </span>
+                            {% elif result.signal == 'SELL' %}
+                            <span class="badge badge-error">
+                                ↘ SELL
+                            </span>
+                            {% else %}
+                            <span class="badge badge-neutral">─ NEUTRAL</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-family: monospace;">₹{{ result.current_price }}</td>
+                        <td style="font-family: monospace; font-size: 0.875rem; color: var(--text-secondary);">₹{{ result.ema10 }}</td>
+                        <td style="font-family: monospace; font-size: 0.875rem; color: var(--text-secondary);">₹{{ result.ema20 }}</td>
+                        <td class="text-secondary" style="font-size: 0.875rem;">{{ result.timeframe }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
     {% else %}
     <div class="alert alert-warning">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <span>No results available. There may have been errors fetching data for some symbols.</span>
+        <div>
+            <strong>⚠</strong>
+            <span>No results available. There may have been errors fetching data for some symbols.</span>
+        </div>
     </div>
     {% endif %}
 
     <!-- Actions -->
-    <div class="flex gap-4 mt-8">
+    <div class="flex gap-4" style="margin-top: 2rem; flex-wrap: wrap;">
         <a href="/scan/{{ watchlist.id }}" class="btn btn-primary">Run New Scan</a>
-        <a href="/watchlist/{{ watchlist.id }}" class="btn btn-outline">Manage Watchlist</a>
+        <a href="/watchlist/{{ watchlist.id }}" class="btn btn-secondary">Manage Watchlist</a>
         <a href="/dashboard" class="btn btn-ghost">Back to Dashboard</a>
     </div>
 </div>
 
+<style>
+.active-filter {
+    background-color: rgba(62, 207, 142, 0.2);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+</style>
+
 <script>
 function filterResults(signal) {
     const rows = document.querySelectorAll('.result-row');
-    const tabs = document.querySelectorAll('.tab');
+    const buttons = document.querySelectorAll('.filter-btn');
 
-    // Update active tab
-    tabs.forEach(tab => tab.classList.remove('tab-active'));
-    event.target.classList.add('tab-active');
+    // Update active button
+    buttons.forEach(btn => {
+        if (btn.dataset.filter === signal) {
+            btn.classList.add('active-filter');
+        } else {
+            btn.classList.remove('active-filter');
+        }
+    });
 
     // Filter rows
     rows.forEach(row => {
