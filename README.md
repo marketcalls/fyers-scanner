@@ -6,27 +6,36 @@ A real-time stock scanner built with Fyers API, FastAPI, SQLAlchemy, Tailwind CS
 
 - **Multi-user Support**: Secure user authentication and registration
 - **Fyers OAuth Integration**: OAuth2 authentication with Fyers API
+- **Automatic Token Management**: Daily token cleanup at 3:00 AM IST (tokens expire after 24 hours)
 - **Watchlist Management**: Create and manage multiple watchlists with custom symbols
-- **EMA Crossover Scanner**: Detects 10 EMA and 20 EMA crossovers
+- **Historical Crossover Detection**: Detects ALL 10 EMA and 20 EMA crossovers in the last 5 days
 - **Multiple Timeframes**: Scan on 5-minute, 10-minute, or 15-minute charts
 - **Real-time Data**: Fetches historical data from Fyers API
-- **Beautiful UI**: Modern, responsive interface using Tailwind CSS and DaisyUI
+- **Dark/Light Theme**: Toggle between dark and light modes with persistent preference
+- **Beautiful UI**: Modern, responsive Supabase-inspired interface
 - **Centralized Logging**: Comprehensive logging with rotation for debugging and monitoring
 
 ## Scanner Strategy
 
-The scanner uses the following logic:
+The scanner detects ALL EMA crossover events in the last 5 days:
 
-- **BUY Signal**: When 10 EMA crosses above 20 EMA (Bullish crossover)
-- **SELL Signal**: When 10 EMA crosses below 20 EMA (Bearish crossover)
-- **NEUTRAL**: No crossover detected
+- **Positive EMA Crossover**: When 10 EMA crosses above 20 EMA (Bullish signal)
+- **Negative EMA Crossover**: When 10 EMA crosses below 20 EMA (Bearish signal)
+
+Each crossover event includes:
+- Timestamp and date of the crossover
+- Symbol ticker
+- Close price at crossover
+- EMA10 and EMA20 values at crossover
+
+Results are displayed in chronological order with filtering options for positive/negative signals.
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd scanner
+git clone https://github.com/marketcalls/fyers-scanner.git
+cd fyers-scanner
 ```
 
 2. Create a virtual environment (recommended):
@@ -90,6 +99,24 @@ The application will be available at: http://localhost:8000
 
 4. **Run a Scan**: Select a watchlist, choose a timeframe, and run the scan
 
+## Automatic Token Management
+
+**Important**: Fyers access tokens expire after 24 hours. To handle this automatically:
+
+- The application runs a **scheduled task that clears all user tokens daily at 3:00 AM IST**
+- After 3:00 AM, users will need to re-authenticate with Fyers
+- A warning message will appear on the dashboard when your token has expired
+- Simply click "Connect Fyers" or "Re-authenticate" to get a fresh token
+
+This ensures compliance with Fyers' token expiration policy and maintains security.
+
+**How it works:**
+- Uses APScheduler with IST timezone settings
+- Scheduled job runs at exactly 3:00 AM IST every day
+- Clears `access_token` field for all users in the database
+- Users are prompted to re-authenticate on next login
+- All scheduled tasks are logged for monitoring
+
 ## Project Structure
 
 ```
@@ -100,6 +127,7 @@ scanner/
 ├── auth.py                # Authentication utilities (password hashing, JWT)
 ├── fyers_api.py           # Fyers API integration
 ├── scanner.py             # EMA calculation and crossover detection logic
+├── scheduler.py           # Token cleanup scheduler (runs daily at 3 AM IST)
 ├── logger.py              # Centralized logging configuration
 ├── requirements.txt       # Python dependencies
 ├── templates/             # Jinja2 HTML templates
@@ -175,9 +203,10 @@ Logs are stored in the `logs/` directory with automatic rotation:
 
 - **Backend**: FastAPI, Python 3.12+
 - **Database**: SQLite with SQLAlchemy ORM
-- **Frontend**: Jinja2 templates, Tailwind CSS, DaisyUI
+- **Frontend**: Jinja2 templates, CSS (Supabase-inspired theme)
 - **API**: Fyers API v3
 - **Authentication**: Passlib (bcrypt), PyJWT, OAuth2
+- **Scheduling**: APScheduler (for daily token cleanup)
 - **HTTP Client**: httpx
 - **Data Analysis**: pandas, numpy
 
@@ -190,9 +219,11 @@ Logs are stored in the `logs/` directory with automatic rotation:
 
 ## Troubleshooting
 
-### "Access token not set"
-- Go to Dashboard and click "Authenticate Fyers"
+### "Access token not set" or "Your Fyers session has expired"
+- This is expected after 3:00 AM IST when tokens are automatically cleared
+- Go to Dashboard and click "Connect Fyers" or "Re-authenticate"
 - Complete the OAuth2 flow with your Fyers credentials
+- You'll need to do this daily due to Fyers' 24-hour token expiration policy
 
 ### "No data available for symbol"
 - Ensure the symbol format is correct (`EXCHANGE:SYMBOL-TYPE`)

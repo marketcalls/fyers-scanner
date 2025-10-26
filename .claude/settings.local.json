@@ -5,7 +5,9 @@
       "Bash(cat:*)",
       "Bash(pip uninstall:*)",
       "Bash(pip install:*)",
-      "Read(//c/Users/Admin1/Desktop/**)"
+      "Read(//c/Users/Admin1/Desktop/**)",
+      "Bash(python:*)",
+      "Bash(uvicorn:*)"
     ],
     "deny": [],
     "ask": []

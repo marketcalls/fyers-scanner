@@ -24,6 +24,12 @@
     </div>
     {% endif %}
 
+    {% if warning %}
+    <div class="alert alert-warning" style="margin-bottom: 2rem;">
+        <strong>⚠</strong> {{ warning }}
+    </div>
+    {% endif %}
+
     <!-- Fyers Authentication Status -->
     <div class="card" style="margin-bottom: 3rem;">
         <div class="flex justify-between items-center">

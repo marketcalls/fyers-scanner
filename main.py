@@ -17,6 +17,7 @@ from auth import hash_password, verify_password
 from fyers_api import FyersAPI
 from scanner import EMAScanner
 from logger import logger
+from scheduler import scheduler_instance
 
 # Create FastAPI app
 app = FastAPI(title="Fyers Intraday Scanner", version="1.0.0")
@@ -36,6 +37,17 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def startup_event():
     create_tables()
     logger.info("Application started - database tables created")
+
+    # Start the scheduler for daily token cleanup at 3:00 AM IST
+    scheduler_instance.start()
+    logger.info("Token cleanup scheduler started - will clear tokens daily at 3:00 AM IST")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Gracefully shutdown the scheduler on app shutdown"""
+    scheduler_instance.shutdown()
+    logger.info("Application shutting down - scheduler stopped")
 
 
 # Dependency to get current user from session
@@ -266,6 +278,12 @@ async def dashboard(
     success = request.session.pop("success", None)
     error = request.session.pop("error", None)
 
+    # Check if Fyers access token is missing (cleared by daily cleanup at 3 AM)
+    warning = None
+    if not user.access_token:
+        warning = "Your Fyers session has expired (tokens expire daily at 3:00 AM IST). Please authenticate with Fyers to continue using the scanner."
+        logger.info(f"User {user.username} needs to re-authenticate - access token is None")
+
     return templates.TemplateResponse(
         "dashboard.html",
         {
@@ -273,7 +291,8 @@ async def dashboard(
             "user": user,
             "watchlists": watchlists,
             "success": success,
-            "error": error
+            "error": error,
+            "warning": warning
         }
     )
 
