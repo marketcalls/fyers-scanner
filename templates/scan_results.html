@@ -7,108 +7,140 @@
     <div style="margin-bottom: 2rem;">
         <a href="/scan/{{ watchlist.id }}" class="text-secondary" style="font-size: 0.875rem; text-decoration: none;">← Back to Scan</a>
         <h1 style="font-size: 2.5rem; font-weight: 700; margin-top: 0.5rem; margin-bottom: 0.5rem;">
-            Scan Results: <span class="text-accent">{{ watchlist.name }}</span>
+            EMA Crossover Events: <span class="text-accent">{{ watchlist.name }}</span>
         </h1>
-        <p class="text-secondary">Timeframe: {{ timeframe }}m | {{ scan_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        <p class="text-secondary">Timeframe: {{ timeframe}}m | Last 5 Days | {{ scan_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>
     </div>
 
     <!-- Summary Stats -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">Total Symbols</div>
-            <div class="stat-value">{{ results|length }}</div>
-            <div class="stat-desc">Scanned successfully</div>
-        </div>
-
-        <div class="stat-card" style="border-color: var(--success-green);">
-            <div class="stat-label">Buy Signals</div>
-            <div class="stat-value" style="color: var(--success-green);">{{ buy_signals }}</div>
-            <div class="stat-desc">Bullish crossovers</div>
-        </div>
-
-        <div class="stat-card" style="border-color: var(--error-red);">
-            <div class="stat-label">Sell Signals</div>
-            <div class="stat-value" style="color: var(--error-red);">{{ sell_signals }}</div>
-            <div class="stat-desc">Bearish crossovers</div>
+            <div class="stat-label">Symbols Scanned</div>
+            <div class="stat-value">{{ total_symbols_scanned }}</div>
+            <div class="stat-desc">In watchlist</div>
         </div>
 
         <div class="stat-card">
-            <div class="stat-label">Neutral</div>
-            <div class="stat-value" style="color: var(--text-secondary);">{{ neutral_signals }}</div>
-            <div class="stat-desc">No crossover</div>
+            <div class="stat-label">Total Crossovers</div>
+            <div class="stat-value">{{ total_crossovers }}</div>
+            <div class="stat-desc">Last 5 days</div>
+        </div>
+
+        <div class="stat-card" style="border-color: var(--success-green);">
+            <div class="stat-label">Positive Crossovers</div>
+            <div class="stat-value" style="color: var(--success-green);">{{ positive_crossovers }}</div>
+            <div class="stat-desc">Bullish signals</div>
+        </div>
+
+        <div class="stat-card" style="border-color: var(--error-red);">
+            <div class="stat-label">Negative Crossovers</div>
+            <div class="stat-value" style="color: var(--error-red);">{{ negative_crossovers }}</div>
+            <div class="stat-desc">Bearish signals</div>
         </div>
     </div>
 
     <!-- Filter Tabs -->
     <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
-        <button onclick="filterResults('all')" class="filter-btn btn btn-secondary active-filter" data-filter="all">
-            All ({{ results|length }})
+        <button onclick="filterCrossovers('all')" class="filter-btn btn btn-secondary active-filter" data-filter="all">
+            All ({{ total_crossovers }})
         </button>
-        <button onclick="filterResults('buy')" class="filter-btn btn btn-secondary" data-filter="buy" style="border-color: var(--success-green); color: var(--success-green);">
-            Buy ({{ buy_signals }})
+        <button onclick="filterCrossovers('positive')" class="filter-btn btn btn-secondary" data-filter="positive" style="border-color: var(--success-green); color: var(--success-green);">
+            Positive ({{ positive_crossovers }})
         </button>
-        <button onclick="filterResults('sell')" class="filter-btn btn btn-secondary" data-filter="sell" style="border-color: var(--error-red); color: var(--error-red);">
-            Sell ({{ sell_signals }})
-        </button>
-        <button onclick="filterResults('neutral')" class="filter-btn btn btn-secondary" data-filter="neutral">
-            Neutral ({{ neutral_signals }})
+        <button onclick="filterCrossovers('negative')" class="filter-btn btn btn-secondary" data-filter="negative" style="border-color: var(--error-red); color: var(--error-red);">
+            Negative ({{ negative_crossovers }})
         </button>
     </div>
 
-    <!-- Results Table -->
-    {% if results %}
+    <!-- Crossover Events Table -->
+    {% if all_crossovers %}
     <div class="card">
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Symbol</th>
-                        <th>Display Name</th>
-                        <th>Signal</th>
-                        <th>Current Price</th>
-                        <th>10 EMA</th>
-                        <th>20 EMA</th>
-                        <th>Timeframe</th>
+                        <th>DateTime</th>
+                        <th>Ticker</th>
+                        <th>Crossover Type</th>
+                        <th>Close</th>
+                        <th>EMA10</th>
+                        <th>EMA20</th>
                     </tr>
                 </thead>
-                <tbody id="resultsTable">
-                    {% for result in results %}
-                    <tr class="result-row" data-signal="{{ result.signal.lower() }}">
-                        <td>{{ loop.index }}</td>
-                        <td><code style="font-size: 0.875rem;">{{ result.symbol }}</code></td>
-                        <td style="font-weight: 600;">{{ result.display_name }}</td>
+                <tbody id="crossoversTable">
+                    {% for crossover in all_crossovers %}
+                    <tr class="crossover-row" data-type="{{ 'positive' if crossover.crossover_type == 'Positive EMA Crossover' else 'negative' }}">
+                        <td style="font-family: monospace; font-size: 0.875rem;">{{ crossover.datetime }}</td>
+                        <td style="font-weight: 600; font-size: 0.95rem;">{{ crossover.ticker }}</td>
                         <td>
-                            {% if result.signal == 'BUY' %}
-                            <span class="badge badge-success">
-                                ↗ BUY
-                            </span>
-                            {% elif result.signal == 'SELL' %}
-                            <span class="badge badge-error">
-                                ↘ SELL
+                            {% if crossover.crossover_type == "Positive EMA Crossover" %}
+                            <span class="badge badge-success" style="font-size: 0.75rem;">
+                                ↗ Positive EMA Crossover
                             </span>
                             {% else %}
-                            <span class="badge badge-neutral">─ NEUTRAL</span>
+                            <span class="badge badge-error" style="font-size: 0.75rem;">
+                                ↘ Negative EMA Crossover
+                            </span>
                             {% endif %}
                         </td>
-                        <td style="font-family: monospace;">₹{{ result.current_price }}</td>
-                        <td style="font-family: monospace; font-size: 0.875rem; color: var(--text-secondary);">₹{{ result.ema10 }}</td>
-                        <td style="font-family: monospace; font-size: 0.875rem; color: var(--text-secondary);">₹{{ result.ema20 }}</td>
-                        <td class="text-secondary" style="font-size: 0.875rem;">{{ result.timeframe }}</td>
+                        <td style="font-family: monospace; font-weight: 600;">₹{{ crossover.close }}</td>
+                        <td style="font-family: monospace; color: var(--text-secondary); font-size: 0.875rem;">₹{{ crossover.ema10 }}</td>
+                        <td style="font-family: monospace; color: var(--text-secondary); font-size: 0.875rem;">₹{{ crossover.ema20 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Info -->
+        <div style="padding: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
+            Showing {{ all_crossovers|length }} crossover events
+        </div>
     </div>
     {% else %}
-    <div class="alert alert-warning">
+    <div class="alert alert-info">
         <div>
-            <strong>⚠</strong>
-            <span>No results available. There may have been errors fetching data for some symbols.</span>
+            <strong>ℹ</strong>
+            <span>No crossover events found in the last 5 days for the selected symbols.</span>
         </div>
     </div>
     {% endif %}
+
+    <!-- Per-Symbol Summary (Expandable) -->
+    <div class="card" style="margin-top: 2rem;">
+        <h2 class="card-title" style="margin-bottom: 1rem;">Per-Symbol Summary</h2>
+        <div class="grid grid-cols-3">
+            {% for result in scan_results %}
+            <div class="card" style="padding: 1rem;">
+                <div style="margin-bottom: 0.75rem;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem;">{{ result.display_name }}</h3>
+                    <p style="font-size: 0.75rem; color: var(--text-muted);">{{ result.symbol }}</p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span class="text-secondary" style="font-size: 0.875rem;">Crossovers:</span>
+                    <span style="font-weight: 600;">{{ result.total_crossovers }}</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span class="text-secondary" style="font-size: 0.875rem;">Current:</span>
+                    <span style="font-family: monospace; font-size: 0.875rem;">₹{{ result.current_price }}</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="text-secondary" style="font-size: 0.875rem;">Signal:</span>
+                    {% if result.current_signal == "Bullish" %}
+                    <span class="badge badge-success" style="font-size: 0.7rem;">{{ result.current_signal }}</span>
+                    {% elif result.current_signal == "Bearish" %}
+                    <span class="badge badge-error" style="font-size: 0.7rem;">{{ result.current_signal }}</span>
+                    {% else %}
+                    <span class="badge badge-neutral" style="font-size: 0.7rem;">{{ result.current_signal }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
     <!-- Actions -->
     <div class="flex gap-4" style="margin-top: 2rem; flex-wrap: wrap;">
@@ -127,13 +159,13 @@
 </style>
 
 <script>
-function filterResults(signal) {
-    const rows = document.querySelectorAll('.result-row');
+function filterCrossovers(type) {
+    const rows = document.querySelectorAll('.crossover-row');
     const buttons = document.querySelectorAll('.filter-btn');
 
     // Update active button
     buttons.forEach(btn => {
-        if (btn.dataset.filter === signal) {
+        if (btn.dataset.filter === type) {
             btn.classList.add('active-filter');
         } else {
             btn.classList.remove('active-filter');
@@ -142,9 +174,9 @@ function filterResults(signal) {
 
     // Filter rows
     rows.forEach(row => {
-        if (signal === 'all') {
+        if (type === 'all') {
             row.style.display = '';
-        } else if (row.dataset.signal === signal) {
+        } else if (row.dataset.type === type) {
             row.style.display = '';
         } else {
             row.style.display = 'none';

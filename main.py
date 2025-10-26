@@ -527,28 +527,32 @@ async def run_scan(
     logger.info(f"Starting scan for watchlist {watchlist.name} with {len(symbols_to_scan)} symbols on {timeframe}m")
     scan_results = await scanner.scan_watchlist(symbols_to_scan, timeframe)
 
-    # Save scan results to database
+    # Flatten all crossover events from all symbols
+    all_crossovers = []
     for result in scan_results:
-        scan_record = ScanResult(
-            user_id=user.id,
-            watchlist_id=watchlist_id,
-            symbol=result["symbol"],
-            timeframe=timeframe,
-            signal=result["signal"],
-            ema10=result["ema10"],
-            ema20=result["ema20"],
-            current_price=result["current_price"]
-        )
-        db.add(scan_record)
+        symbol_name = result["display_name"]
+        for crossover in result.get("crossovers", []):
+            crossover_event = {
+                "datetime": crossover["datetime"],
+                "timestamp": crossover["timestamp"],
+                "ticker": symbol_name,
+                "crossover_type": crossover["crossover_type"],
+                "close": crossover["close"],
+                "ema10": crossover["ema10"],
+                "ema20": crossover["ema20"]
+            }
+            all_crossovers.append(crossover_event)
 
-    db.commit()
+    # Sort all crossovers by timestamp (most recent first)
+    all_crossovers.sort(key=lambda x: x["timestamp"], reverse=True)
 
-    # Calculate summary
-    buy_signals = len([r for r in scan_results if r["signal"] == "BUY"])
-    sell_signals = len([r for r in scan_results if r["signal"] == "SELL"])
-    neutral_signals = len([r for r in scan_results if r["signal"] == "NEUTRAL"])
+    # Calculate summary statistics
+    total_symbols_scanned = len(scan_results)
+    total_crossovers = len(all_crossovers)
+    positive_crossovers = len([c for c in all_crossovers if c["crossover_type"] == "Positive EMA Crossover"])
+    negative_crossovers = len([c for c in all_crossovers if c["crossover_type"] == "Negative EMA Crossover"])
 
-    logger.info(f"Scan complete: {buy_signals} BUY, {sell_signals} SELL, {neutral_signals} NEUTRAL")
+    logger.info(f"Scan complete: {total_symbols_scanned} symbols, {total_crossovers} total crossovers ({positive_crossovers} positive, {negative_crossovers} negative)")
 
     # Render results page
     return templates.TemplateResponse(
@@ -558,10 +562,12 @@ async def run_scan(
             "user": user,
             "watchlist": watchlist,
             "timeframe": timeframe,
-            "results": scan_results,
-            "buy_signals": buy_signals,
-            "sell_signals": sell_signals,
-            "neutral_signals": neutral_signals,
+            "scan_results": scan_results,
+            "all_crossovers": all_crossovers,
+            "total_symbols_scanned": total_symbols_scanned,
+            "total_crossovers": total_crossovers,
+            "positive_crossovers": positive_crossovers,
+            "negative_crossovers": negative_crossovers,
             "scan_time": datetime.now()
         }
     )
