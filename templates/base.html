@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Fyers Intraday Scanner{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .signal-buy { @apply badge badge-success; }
+        .signal-sell { @apply badge badge-error; }
+        .signal-neutral { @apply badge badge-ghost; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    {% if user %}
+    <div class="navbar bg-base-100 shadow-lg">
+        <div class="navbar-start">
+            <div class="dropdown">
+                <label tabindex="0" class="btn btn-ghost lg:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+                    </svg>
+                </label>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a href="/dashboard">Dashboard</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </div>
+            <a href="/dashboard" class="btn btn-ghost normal-case text-xl">📈 Fyers Scanner</a>
+        </div>
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1">
+                <li><a href="/dashboard">Dashboard</a></li>
+            </ul>
+        </div>
+        <div class="navbar-end">
+            <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost">
+                    <div class="avatar placeholder">
+                        <div class="bg-neutral-focus text-neutral-content rounded-full w-8">
+                            <span class="text-xs">{{ user.username[0].upper() }}</span>
+                        </div>
+                    </div>
+                    <span class="ml-2 hidden lg:inline">{{ user.username }}</span>
+                </label>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li class="menu-title">
+                        <span>{{ user.email }}</span>
+                    </li>
+                    <li><a href="/fyers/auth">{% if user.access_token %}Re-authenticate{% else %}Authenticate{% endif %} Fyers</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-12">
+        <div>
+            <p>Fyers Intraday Scanner - EMA Crossover Strategy</p>
+        </div>
+    </footer>
+</body>
+</html>

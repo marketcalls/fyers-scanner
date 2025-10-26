@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Fyers Trading{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+    <!-- User Info Card -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">
+                <i class="fas fa-user-circle mr-2"></i>User Information
+            </h2>
+            <div class="space-y-2">
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>App ID:</strong> {{ user.fyers_app_id }}</p>
+                <p><strong>Access Token:</strong>
+                    {% if user.access_token %}
+                        <span class="badge badge-success">Active</span>
+                    {% else %}
+                        <span class="badge badge-warning">Not Set</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="card bg-base-100 shadow-xl lg:col-span-2">
+        <div class="card-body">
+            <h2 class="card-title">
+                <i class="fas fa-chart-bar mr-2"></i>Quick Actions
+            </h2>
+
+            {% if not user.access_token %}
+            <div class="alert alert-warning mb-4">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <p class="font-semibold">Access Token Required</p>
+                    <p class="text-sm">Please authenticate with Fyers to enable trading.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                {% if not user.access_token %}
+                <a href="/fyers/auth" class="btn btn-primary">
+                    <i class="fas fa-link mr-2"></i>Authenticate with Fyers
+                </a>
+                {% endif %}
+                <button class="btn btn-outline" onclick="document.getElementById('place_order_section').scrollIntoView({behavior: 'smooth'})">
+                    <i class="fas fa-plus-circle mr-2"></i>Place Order
+                </button>
+                <button class="btn btn-outline" onclick="update_access_token_modal.showModal()">
+                    <i class="fas fa-key mr-2"></i>Update Token
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Place Order Section -->
+<div id="place_order_section" class="card bg-base-100 shadow-xl mt-6">
+    <div class="card-body">
+        <h2 class="card-title text-2xl mb-4">
+            <i class="fas fa-shopping-cart mr-2"></i>Place Order
+        </h2>
+
+        {% if order_response %}
+        <div class="alert {% if order_response.s == 'ok' %}alert-success{% else %}alert-error{% endif %} mb-4">
+            <i class="fas {% if order_response.s == 'ok' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+            <div>
+                <p><strong>{{ order_response.message }}</strong></p>
+                {% if order_response.id %}
+                <p class="text-sm">Order ID: {{ order_response.id }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/place-order" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Symbol -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Symbol</span>
+                        <span class="label-text-alt text-info cursor-help" title="Example: NSE:SBIN-EQ, MCX:GOLD20DECFUT">
+                            <i class="fas fa-info-circle"></i>
+                        </span>
+                    </label>
+                    <input type="text" name="symbol" placeholder="e.g., NSE:SBIN-EQ" class="input input-bordered" required />
+                </div>
+
+                <!-- Quantity -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Quantity</span>
+                    </label>
+                    <input type="number" name="qty" placeholder="1" class="input input-bordered" required min="1" />
+                </div>
+
+                <!-- Order Type -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Order Type</span>
+                    </label>
+                    <select name="type" class="select select-bordered" required>
+                        <option value="1">Limit Order</option>
+                        <option value="2" selected>Market Order</option>
+                        <option value="3">Stop Order (SL-M)</option>
+                        <option value="4">Stoplimit Order (SL-L)</option>
+                    </select>
+                </div>
+
+                <!-- Side -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Side</span>
+                    </label>
+                    <select name="side" class="select select-bordered" required>
+                        <option value="1" selected>Buy</option>
+                        <option value="-1">Sell</option>
+                    </select>
+                </div>
+
+                <!-- Product Type -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Product Type</span>
+                    </label>
+                    <select name="productType" class="select select-bordered" required>
+                        <option value="INTRADAY" selected>INTRADAY</option>
+                        <option value="CNC">CNC</option>
+                        <option value="MARGIN">MARGIN</option>
+                        <option value="CO">CO (Cover Order)</option>
+                        <option value="BO">BO (Bracket Order)</option>
+                        <option value="MTF">MTF</option>
+                    </select>
+                </div>
+
+                <!-- Validity -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Validity</span>
+                    </label>
+                    <select name="validity" class="select select-bordered" required>
+                        <option value="DAY" selected>DAY</option>
+                        <option value="IOC">IOC</option>
+                    </select>
+                </div>
+
+                <!-- Limit Price -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Limit Price</span>
+                        <span class="label-text-alt">(For Limit/Stoplimit orders)</span>
+                    </label>
+                    <input type="number" name="limitPrice" placeholder="0" class="input input-bordered" step="0.01" value="0" />
+                </div>
+
+                <!-- Stop Price -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Stop Price</span>
+                        <span class="label-text-alt">(For Stop/Stoplimit orders)</span>
+                    </label>
+                    <input type="number" name="stopPrice" placeholder="0" class="input input-bordered" step="0.01" value="0" />
+                </div>
+
+                <!-- Disclosed Qty -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Disclosed Quantity</span>
+                        <span class="label-text-alt">(Equity only)</span>
+                    </label>
+                    <input type="number" name="disclosedQty" placeholder="0" class="input input-bordered" min="0" value="0" />
+                </div>
+
+                <!-- Stop Loss -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Stop Loss</span>
+                        <span class="label-text-alt">(For CO/BO orders)</span>
+                    </label>
+                    <input type="number" name="stopLoss" placeholder="0" class="input input-bordered" step="0.01" value="0" />
+                </div>
+
+                <!-- Take Profit -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Take Profit</span>
+                        <span class="label-text-alt">(For BO orders)</span>
+                    </label>
+                    <input type="number" name="takeProfit" placeholder="0" class="input input-bordered" step="0.01" value="0" />
+                </div>
+
+                <!-- Order Tag -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Order Tag</span>
+                        <span class="label-text-alt">(Optional)</span>
+                    </label>
+                    <input type="text" name="orderTag" placeholder="tag1" class="input input-bordered" />
+                </div>
+            </div>
+
+            <!-- Offline Order Checkbox -->
+            <div class="form-control">
+                <label class="label cursor-pointer justify-start gap-4">
+                    <input type="checkbox" name="offlineOrder" class="checkbox" />
+                    <span class="label-text">After Market Order (AMO)</span>
+                </label>
+            </div>
+
+            <div class="card-actions justify-end mt-6">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-paper-plane mr-2"></i>Place Order
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Update Access Token Modal -->
+<dialog id="update_access_token_modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">Update Access Token</h3>
+        <form method="POST" action="/update-token">
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Access Token</span>
+                </label>
+                <input type="text" name="access_token" placeholder="Enter new access token" class="input input-bordered" required />
+            </div>
+            <div class="modal-action">
+                <button type="button" class="btn" onclick="update_access_token_modal.close()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<!-- Reference Guide -->
+<div class="card bg-base-100 shadow-xl mt-6">
+    <div class="card-body">
+        <h2 class="card-title">
+            <i class="fas fa-book mr-2"></i>Quick Reference Guide
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="table table-zebra">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Values</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Order Types</strong></td>
+                        <td>1=Limit, 2=Market, 3=Stop(SL-M), 4=Stoplimit(SL-L)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Product Types</strong></td>
+                        <td>CNC, INTRADAY, MARGIN, CO, BO, MTF</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Equity Symbol</strong></td>
+                        <td>NSE:SBIN-EQ, BSE:ACC-A</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Futures Symbol</strong></td>
+                        <td>NSE:NIFTY20OCTFUT, MCX:GOLD20DECFUT</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Options Symbol</strong></td>
+                        <td>NSE:NIFTY20OCT11000CE, NSE:NIFTY20O812000PE</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

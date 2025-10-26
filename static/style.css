@@ -1,0 +1,16 @@
+/* Custom styles for Fyers Scanner */
+
+/* Add any custom CSS here if needed */
+.signal-buy {
+    color: #10b981;
+    font-weight: bold;
+}
+
+.signal-sell {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.signal-neutral {
+    color: #6b7280;
+}

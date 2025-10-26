@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Scan {{ watchlist.name }} - Fyers Scanner{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <a href="/watchlist/{{ watchlist.id }}" class="btn btn-ghost btn-sm mb-2">← Back to Watchlist</a>
+        <h1 class="text-4xl font-bold">Scan: {{ watchlist.name }}</h1>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title mb-4">Configure Scan</h2>
+
+            <!-- Scanner Info -->
+            <div class="alert alert-info mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 class="font-bold">EMA Crossover Scanner</h3>
+                    <p class="text-sm">This scanner detects 10 EMA and 20 EMA crossovers for intraday trading signals.</p>
+                    <ul class="text-sm list-disc list-inside mt-2">
+                        <li><strong>BUY Signal:</strong> 10 EMA crosses above 20 EMA (Bullish crossover)</li>
+                        <li><strong>SELL Signal:</strong> 10 EMA crosses below 20 EMA (Bearish crossover)</li>
+                        <li><strong>NEUTRAL:</strong> No crossover detected</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Watchlist Info -->
+            <div class="stats shadow mb-6">
+                <div class="stat">
+                    <div class="stat-title">Watchlist</div>
+                    <div class="stat-value text-2xl">{{ watchlist.name }}</div>
+                    <div class="stat-desc">{{ watchlist.symbols|length }} symbols to scan</div>
+                </div>
+            </div>
+
+            {% if watchlist.symbols|length == 0 %}
+            <div class="alert alert-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>This watchlist is empty. Please add symbols before running a scan.</span>
+            </div>
+            <div class="card-actions justify-end mt-4">
+                <a href="/watchlist/{{ watchlist.id }}" class="btn btn-primary">Add Symbols</a>
+            </div>
+            {% else %}
+            <!-- Scan Configuration Form -->
+            <form method="post" action="/scan/{{ watchlist.id }}/run">
+                <div class="form-control w-full mb-6">
+                    <label class="label">
+                        <span class="label-text font-bold">Select Timeframe</span>
+                    </label>
+                    <div class="grid grid-cols-3 gap-4">
+                        <label class="label cursor-pointer border rounded-lg p-4 hover:bg-base-200">
+                            <span class="label-text">5 Minutes</span>
+                            <input type="radio" name="timeframe" value="5" class="radio radio-primary" checked />
+                        </label>
+                        <label class="label cursor-pointer border rounded-lg p-4 hover:bg-base-200">
+                            <span class="label-text">10 Minutes</span>
+                            <input type="radio" name="timeframe" value="10" class="radio radio-primary" />
+                        </label>
+                        <label class="label cursor-pointer border rounded-lg p-4 hover:bg-base-200">
+                            <span class="label-text">15 Minutes</span>
+                            <input type="radio" name="timeframe" value="15" class="radio radio-primary" />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="card-actions justify-end">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Start Scanning
+                    </button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
