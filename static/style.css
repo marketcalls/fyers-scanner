@@ -1,7 +1,7 @@
-/* Supabase-inspired Dark Theme for Fyers Scanner */
+/* Supabase-inspired Theme for Fyers Scanner - Light & Dark Mode */
 
 :root {
-    /* Dark theme colors inspired by Supabase */
+    /* Dark theme colors (default) */
     --bg-primary: #0f0f0f;
     --bg-secondary: #1a1a1a;
     --bg-card: #1e1e1e;
@@ -16,6 +16,43 @@
     --error-red: #ef4444;
     --success-green: #10b981;
     --warning-yellow: #f59e0b;
+}
+
+/* Light theme colors */
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f3f5;
+    --border-color: #e1e4e8;
+    --text-primary: #1a1a1a;
+    --text-secondary: #586069;
+    --text-muted: #959da5;
+    --accent-green: #3ECF8E;
+    --accent-green-hover: #36b77a;
+    --accent-green-dark: #2a9d6b;
+    --error-red: #d73a49;
+    --success-green: #28a745;
+    --warning-yellow: #ffc107;
+}
+
+/* Light theme specific adjustments */
+[data-theme="light"] .card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .stat-card,
+[data-theme="light"] .auth-card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] code {
+    background-color: #f6f8fa;
+    color: #2a9d6b;
 }
 
 * {
@@ -439,4 +476,55 @@ footer {
     text-align: center;
     color: var(--text-muted);
     margin-top: 4rem;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+    background-color: var(--bg-card-hover);
+    border-color: var(--accent-green);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text-primary);
+}
+
+.theme-icon {
+    display: none;
+}
+
+[data-theme="dark"] .theme-icon-dark {
+    display: block;
+}
+
+[data-theme="light"] .theme-icon-light {
+    display: block;
+}
+
+/* Smooth theme transition */
+body,
+.card,
+.btn,
+.form-input,
+.navbar,
+footer,
+.stat-card,
+.auth-card,
+.alert {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
